@@ -4,7 +4,7 @@
 #######                 Author : Achraf KHABAR              #######
 #######                 Date : 03/29/2026                   #######
 #######            Last updates Date : 03/29/2026           #######
-#######               Description : Install k3s             #######
+#######              Title : Install k3s clustor            #######
 ###################################################################
 
 # Debugging mode activated

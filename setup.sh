@@ -4,6 +4,7 @@
 #######                 Author : Achraf KHABAR              #######
 #######                 Date : 03/28/2026                   #######
 #######            Last updates Date : 03/29/2026           #######
+#######               Title : setup linux tools             #######
 ###################################################################
 
 # Debugging mode activated
