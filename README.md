@@ -91,7 +91,7 @@ URL: http://localhost:3000
 
 Once logged in, navigate to Dashboards > General > Kubernetes / Compute Resources / Cluster to view real-time metrics of your infrastructure.
 
-### Teardown (Clean up)
+### 5. Teardown (Clean up)
 
 To cleanly destroy the infrastructure and free up resources:
 ```bash
