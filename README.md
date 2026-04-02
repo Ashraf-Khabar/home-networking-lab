@@ -90,7 +90,8 @@ kubectl port-forward svc/mon-monitoring-grafana 3000:80 --namespace monitoring
 URL: http://localhost:3000
 
 Once logged in, navigate to Dashboards > General > Kubernetes / Compute Resources / Cluster to view real-time metrics of your infrastructure.
-Teardown (Clean up)
+
+### Teardown (Clean up)
 
 To cleanly destroy the infrastructure and free up resources:
 ```bash
