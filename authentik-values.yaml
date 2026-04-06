@@ -1,0 +1,22 @@
+authentik:
+  secret_key: "SuperSecretKeyLabAchraf2026!"
+  error_reporting:
+    enabled: false
+
+postgresql:
+  enabled: true
+  image:
+    registry: docker.io
+    repository: bitnami/postgresql
+    tag: 16.2.0-debian-12-r10  # On force une image stable spécifique
+    pullPolicy: IfNotPresent
+
+redis:
+  enabled: true
+
+server:
+  ingress:
+    enabled: true
+    ingressClassName: "nginx"
+    hosts:
+      - sso.lab

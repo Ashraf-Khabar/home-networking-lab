@@ -1,0 +1,77 @@
+# 1. LE DISQUE DUR (PersistentVolumeClaim)
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: uptime-kuma-pvc
+  namespace: default
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+---
+# 2. L'APPLICATION (Deployment)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: uptime-kuma-deployment
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: uptime-kuma
+  template:
+    metadata:
+      labels:
+        app: uptime-kuma
+    spec:
+      containers:
+      - name: uptime-kuma
+        # On utilise l'image officielle d'Uptime Kuma
+        image: louislam/uptime-kuma:1
+        ports:
+        - containerPort: 3001
+        # On branche le disque dur au dossier interne de l'application
+        volumeMounts:
+        - name: kuma-storage
+          mountPath: /app/data
+      volumes:
+      - name: kuma-storage
+        persistentVolumeClaim:
+          claimName: uptime-kuma-pvc
+---
+# 3. LA PORTE INTERNE (Service)
+apiVersion: v1
+kind: Service
+metadata:
+  name: uptime-kuma-service
+  namespace: default
+spec:
+  selector:
+    app: uptime-kuma
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 3001
+---
+# 4. LE RECEPTIONNISTE (Ingress)
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: uptime-kuma-ingress
+  namespace: default
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: kuma.lab
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: uptime-kuma-service
+            port: 
+              number: 80
