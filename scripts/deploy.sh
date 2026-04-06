@@ -9,27 +9,15 @@
 
 # Debugging mode activated
 set -x
+set -e
 
 echo "Deploying Kubernetes objects from k8s_pods/ directory..."
 kubectl apply -f k8s_pods/
 
-# WAIT FOR THE POD TO BE READY (Crucial step!)
 echo "Waiting for Pi-hole to be fully running..."
 kubectl rollout status deployment/pihole-deployment
 
-echo "Listing current services:"
-kubectl get services
+echo "Setting Pi-hole admin password..."
+kubectl exec deploy/pihole-deployment -- pihole setpassword Ashraf-password123
 
-echo "=========================================================="
-echo "SUCCESS! The deployment is ready."
-echo "Access the Pi-hole admin interface at: http://localhost:8080/admin"
-echo "Password: admin123"
-echo "Note: This terminal is now locked by the port-forward process."
-echo "Press Ctrl+C to stop the tunnel when you are done."
-echo "=========================================================="
-
-# Forward the port 80 to 8080 on the local machine
-kubectl port-forward svc/pihole-service 8080:80
-
-# Set the password
-exec -it pihole-deployment-566bbc565f-sr9hm -- pihole setpassword 'Ashraf-password123'
+echo "Pi-hole deployment is complete and configured."
