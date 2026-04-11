@@ -12,6 +12,9 @@ nohup kubectl port-forward svc/mon-monitoring-grafana 3000:80 --namespace monito
 # Ortant tunnel (Background)
 nohup kubectl port-forward -n kubernetes-dashboard svc/kubernetes-dashboard 8443:443 > /dev/null 2>&1 &
 
+# keyloak tunnel (Background)
+nohup kubectl port-forward -n keycloak svc/my-keycloak 8080:80 > /dev/null 2>&1 &
+
 # Wait 2 seconds to ensure tunnels are established
 sleep 2
 
@@ -22,4 +25,5 @@ echo "YOUR SERVICES ARE READY:"
 echo "Pi-hole (Via Ingress) : http://pihole.lab:8080/admin"
 echo "Grafana Direct        : http://grafana.lab:3000/dashboards"
 echo "Ortant Direct         : https://ortant.lab:8443"
+echo "keyloak Direct        : http://localhost:8080"
 echo "=========================================================="

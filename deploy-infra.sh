@@ -14,6 +14,7 @@ set -x
 bash shell-scripts/deployments/deploy-kube-infra.sh
 bash shell-scripts/helm-deployement/monitoring-helm-installing.sh
 bash shell-scripts/helm-deployement/octant-helm-installing.sh
+bash shell-scripts/helm-deployement/keycloak-helm-installing.sh
 
 sleep 2
 
