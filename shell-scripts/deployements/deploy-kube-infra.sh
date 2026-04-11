@@ -7,17 +7,20 @@
 #######               Title : run k8s objects               #######
 ###################################################################
 
+# Env variables for security
+source .env
+
 # Debugging mode activated
 set -x
 set -e
 
 echo "Deploying Kubernetes objects from k8s_pods/ directory..."
-kubectl apply -f k8s_pods/
+kubectl apply -f ../kube-objects/
 
 echo "Waiting for Pi-hole to be fully running..."
 kubectl rollout status deployment/pihole-deployment
 
 echo "Setting Pi-hole admin password..."
-kubectl exec deploy/pihole-deployment -- pihole setpassword Ashraf-password123
+kubectl exec deploy/pihole-deployment -- pihole setpassword $PI_HOLE_ADMIN_PASSWORD
 
 echo "Pi-hole deployment is complete and configured."
