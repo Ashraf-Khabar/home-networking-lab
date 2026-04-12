@@ -20,30 +20,7 @@ echo -e "\n ▶ STEP 4: Deploying Observability Stack (Prometheus & Grafana)..."
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 helm repo update
 
-# SRE FIX : Génération à la volée d'un fichier custom values.yaml pour intégrer le SSO Keycloak
-cat <<EOF > grafana-sso-values.yaml
-grafana:
-  adminPassword: ${GRAFANA_ADMIN_PASSWORD}
-  grafana.ini:
-    server:
-      root_url: http://grafana.lab:8080
-    auth.generic_oauth:
-      enabled: true
-      name: Connexion SSO (Keycloak)
-      allow_sign_up: true
-      client_id: grafana
-      # Le secret devra être récupéré dans Keycloak plus tard. On met un placeholder pour l'instant.
-      client_secret: \${KEYCLOAK_GRAFANA_SECRET} 
-      scopes: openid profile email roles
-      auth_url: http://localhost:8081/realms/homelab/protocol/openid-connect/auth
-      # Les URLs internes utilisent le DNS de Kubernetes pour que Grafana parle à Keycloak sans sortir de l'usine
-      token_url: http://my-keycloak.keycloak.svc.cluster.local:80/realms/homelab/protocol/openid-connect/token
-      api_url: http://my-keycloak.keycloak.svc.cluster.local:80/realms/homelab/protocol/openid-connect/userinfo
-      role_attribute_path: contains(roles[*], 'admin') && 'Admin' || contains(roles[*], 'editor') && 'Editor' || 'Viewer'
-EOF
-
 # SRE FIX: Utilisation de '-f grafana-sso-values.yaml' pour injecter toutes nos préférences
-# Dans monitoring-helm-installing.sh
 helm upgrade --install mon-monitoring prometheus-community/kube-prometheus-stack \
   --namespace monitoring \
   --create-namespace \
