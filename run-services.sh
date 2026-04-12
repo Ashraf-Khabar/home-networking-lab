@@ -16,7 +16,6 @@ nohup kubectl port-forward -n kubernetes-dashboard svc/kubernetes-dashboard 8443
 nohup kubectl port-forward -n authentik svc/authentik-server 8081:80 > /dev/null 2>&1 &
 
 # Adminer tunnel (Background) - port 8082
-
 nohup kubectl port-forward -n databases svc/db-visualizer 8082:8080  > /dev/null 2>&1 &
 
 # Wait 2 seconds to ensure tunnels are established

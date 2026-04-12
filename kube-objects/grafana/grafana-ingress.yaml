@@ -3,14 +3,9 @@ kind: Ingress
 metadata:
   name: grafana-ingress
   namespace: monitoring
-  labels:
-    app.kubernetes.io/name: grafana-ingress
   annotations:
-    # On dit à Nginx d'envoyer la vérification à l'Outpost d'Authentik
-    nginx.ingress.kubernetes.io/auth-url: "http://ak-outpost-authentik-embedded.authentik.svc.cluster.local:9000/outpost.goauthentik.io/auth/nginx"
-    # En cas d'erreur (non connecté), on redirige vers le portail de login
-    nginx.ingress.kubernetes.io/auth-signin: "https://authentik.tondomaine.com/outpost.goauthentik.io/start?rd=$escaped_request_uri"  
-    # On récupère les headers (nom d'utilisateur, groupes) pour que l'app sache qui est là
+    nginx.ingress.kubernetes.io/auth-url: "http://authentik-server.authentik.svc.cluster.local:9000/outpost.goauthentik.io/auth/nginx"
+    nginx.ingress.kubernetes.io/auth-signin: "http://authentic.lab:8081/outpost.goauthentik.io/start?rd=$escaped_request_uri"
     nginx.ingress.kubernetes.io/auth-response-headers: "Set-Cookie,X-authentik-username,X-authentik-groups,X-authentik-email"
 spec:
   ingressClassName: nginx

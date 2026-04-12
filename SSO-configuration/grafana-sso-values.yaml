@@ -1,0 +1,15 @@
+grafana:
+  # Désactive la validation stricte pour permettre le secret en clair dans ce lab
+  assertNoLeakedSecrets: false
+  
+  grafana.ini:
+    auth.generic_oauth:
+      enabled: true
+      name: Authentik
+      allow_sign_up: true
+      client_id: grafana-sso
+      client_secret: TA_CLE_SECRET_SSO # À remplacer par le secret généré dans l'admin Authentik
+      scopes: openid email profile
+      auth_url: http://authentic.lab:8081/application/o/authorize/
+      token_url: http://authentic.lab:8081/application/o/token/
+      api_url: http://authentic.lab:8081/application/o/userinfo/
