@@ -14,13 +14,20 @@ source .env
 set -x
 set -e
 
-echo "Deploying Kubernetes objects from k8s_pods/ directory..."
-kubectl apply -f ./kube-objects/
+echo "▶ Création du Namespace databases..."
+kubectl create namespace databases --dry-run=client -o yaml | kubectl apply -f -
 
-echo "Waiting for Pi-hole to be fully running..."
-kubectl rollout status deployment/pihole-deployment
+echo "▶ Injection du Secret pour PostgreSQL..."
+# On supprime l'ancien secret s'il existe, puis on le recrée avec les valeurs du .env
+kubectl delete secret core-db-secrets -n databases --ignore-not-found
+kubectl create secret generic core-db-secrets \
+  --from-literal=POSTGRES_USER=$DB_USER \
+  --from-literal=POSTGRES_PASSWORD=$DB_PASSWORD \
+  --from-literal=POSTGRES_DB=$DB_NAME \
+  -n databases
 
-echo "Setting Pi-hole admin password..."
-kubectl exec deploy/pihole-deployment -- pihole setpassword $PI_HOLE_ADMIN_PASSWORD
-
-echo "Pi-hole deployment is complete and configured."
+echo "▶ Déploiement des objets Kubernetes natifs..."
+kubectl apply -f ./kube-objects/databases/
+kubectl apply -f ./kube-objects/pihole/
+kubectl apply -f ./kube-objects/kuma/
+kubectl apply -f ./kube-objects/grafana/

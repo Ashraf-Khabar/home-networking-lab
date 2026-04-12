@@ -43,10 +43,12 @@ grafana:
 EOF
 
 # SRE FIX: Utilisation de '-f grafana-sso-values.yaml' pour injecter toutes nos préférences
+# Dans monitoring-helm-installing.sh
 helm upgrade --install mon-monitoring prometheus-community/kube-prometheus-stack \
   --namespace monitoring \
   --create-namespace \
-  -f grafana-sso-values.yaml
+  -f grafana-sso-values.yaml \
+  --set grafana.adminPassword=$GRAFANA_ADMIN_PASSWORD
 
 echo -e "\n ▶ STEP 5: Deploying NGINX Ingress Controller & Routing Rules..."
 helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
