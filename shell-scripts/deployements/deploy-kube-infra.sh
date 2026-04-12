@@ -15,7 +15,7 @@ set -x
 set -e
 
 echo "Deploying Kubernetes objects from k8s_pods/ directory..."
-kubectl apply -f ../kube-objects/
+kubectl apply -f ./kube-objects/
 
 echo "Waiting for Pi-hole to be fully running..."
 kubectl rollout status deployment/pihole-deployment

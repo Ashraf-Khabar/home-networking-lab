@@ -11,7 +11,8 @@
 set -x
 
 # Run kubernetes services by scripts
-bash shell-scripts/deployments/deploy-kube-infra.sh
+# FIX SRE : Correction de la faute de frappe sur le dossier 'deployements'
+bash shell-scripts/deployements/deploy-kube-infra.sh
 bash shell-scripts/helm-deployement/monitoring-helm-installing.sh
 bash shell-scripts/helm-deployement/octant-helm-installing.sh
 bash shell-scripts/helm-deployement/keycloak-helm-installing.sh

@@ -9,21 +9,20 @@ nohup kubectl port-forward -n ingress-nginx svc/mon-receptionniste-ingress-nginx
 # Grafana tunnel (Background)
 nohup kubectl port-forward svc/mon-monitoring-grafana 3000:80 --namespace monitoring > /dev/null 2>&1 &
 
-# Ortant tunnel (Background)
+# Octant (Kubernetes Dashboard) tunnel (Background)
 nohup kubectl port-forward -n kubernetes-dashboard svc/kubernetes-dashboard 8443:443 > /dev/null 2>&1 &
 
-# keyloak tunnel (Background)
-nohup kubectl port-forward -n keycloak svc/my-keycloak 8080:80 > /dev/null 2>&1 &
+# Authentik tunnel (Background) - On garde le port 8081
+nohup kubectl port-forward -n authentik svc/authentik-server 8081:80 > /dev/null 2>&1 &
 
 # Wait 2 seconds to ensure tunnels are established
 sleep 2
 
-
-echo "=========================================================="
+echo "==================================================================================="
 echo "Make sure that hosts.txt files contains the names below (pihole.lab, ...)"
 echo "YOUR SERVICES ARE READY:"
 echo "Pi-hole (Via Ingress) : http://pihole.lab:8080/admin"
 echo "Grafana Direct        : http://grafana.lab:3000/dashboards"
-echo "Ortant Direct         : https://ortant.lab:8443"
-echo "keyloak Direct        : http://localhost:8080"
-echo "=========================================================="
+echo "Octant / K8s Dash     : https://octant.lab:8443"
+echo "Authentik Direct      : http://authentic.lab:8081/if/flow/initial-setup/"
+echo "==================================================================================="
