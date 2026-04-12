@@ -1,104 +1,85 @@
-# Home Networking Lab: K3s, Pi-hole & Monitoring (SRE)
+# HOME NETWORKING LAB (SRE)
 
-This project is a Kubernetes-based Home Lab for network infrastructure. 
-It deploys an ad-blocking DNS server (Pi-hole) and a full observability stack (Prometheus & Grafana) using DevOps/SRE best practices (Infrastructure as Code, Helm).
+## TECHNICAL ARCHITECTURE
+The infrastructure is designed using a local "Cloud-Native" model, ensuring 
+high availability and strict service isolation.
 
-## Prerequisites
+1. ENTRY LAYER (INGRESS)
+   - Controller: NGINX Ingress Controller.
+   - Role: Single point of entry (Port 80/443). Manages host-based routing 
+     (Virtual Hosting) to internal cluster services based on local DNS.
 
-Before running this project, ensure you have:
-* A working Kubernetes cluster (K3s or Docker Desktop Kubernetes).
-* The `kubectl` command-line tool.
-* The `helm` package manager (v3).
+2. IDENTITY LAYER (SSO)
+   - Service: Authentik.
+   - Role: Centralized identity provider. Instead of managing passwords per 
+     application, Authentik validates identity via OIDC/SAML before granting 
+     access to downstream services like Grafana.
+
+3. OBSERVABILITY LAYER
+   - Prometheus: Scrapes and stores performance metrics from Pods and Nodes.
+   - Grafana: Data visualization and dashboards connected to Authentik SSO.
+
+4. NETWORK SERVICES LAYER
+   - Pi-hole: Recursive DNS server with network-wide ad-blocking capabilities.
+   - Uptime Kuma: External service monitoring and alerting.
 
 ---
 
-## Phase 1: Pi-hole Deployment (DNS Sinkhole)
+## LOCAL DNS CONFIGURATION (hosts file)
+To route traffic correctly to the NGINX Ingress, you must map your local 
+domains to the local loopback address. 
 
-Pi-hole is deployed using standard YAML manifests (`Deployment` and `Service`) located in the `k8s_pods/` directory.
+Add the following line to your hosts file
 
-### 1. Deploy the Application
-To deploy Pi-hole to the cluster, run:
-```bash
-# Using the automated script
-./deploy.sh
+### For Windows
 
-# OR manually
-kubectl apply -f k8s_pods/
+```sh
+C:\\Windows\\System32\\drivers\\etc\\hosts
 ```
 
-### 2. Access the Admin Interface
-
-To access the web interface from your local machine, open a port-forward tunnel:
-Bash
-
+### For Linux/Mac
+```sh
+/etc/hosts
 ```
-kubectl port-forward svc/pihole-service 8080:80
-```
-
-URL: http://localhost:8080/admin
-
-### 3. Troubleshooting: Reset Password
-
-If the password configured in the YAML (WEBPASSWORD) is ignored during the first boot, force it from inside the Pod:
-Bash
-
-#### 1. Find the Pi-hole Pod name
-
-```
-kubectl get pods
-```
-
-#### 2. Force the password to 'admin123'
-```
-kubectl exec -it <POD_NAME> -- pihole setpassword 'admin123'
-```
-## Phase 2: Observability (Prometheus & Grafana)
-
-The monitoring stack is deployed via Helm (the Kubernetes package manager) to simplify the management of thousands of lines of YAML configuration.
-### 1. Prepare Helm
-
-Add the official Prometheus community repository to your machine:
-```bash
-helm repo add prometheus-community [https://prometheus-community.github.io/helm-charts](https://prometheus-community.github.io/helm-charts)
-helm repo update
-```
-### 2. Deploy the Stack
-
-Install the kube-prometheus-stack mega-package in a dedicated namespace called monitoring:
-Bash
+and chage the configiration names for localhosts :
 
 ```bash
-helm install mon-monitoring prometheus-community/kube-prometheus-stack --namespace monitoring --create-namespace
+127.0.0.1    pihole.lab grafana.lab kuma.lab octant.lab authentic.lab=
 ```
 
-### 3. Retrieve Grafana's Secure Password
+---
 
-Helm generates a secure admin password and stores it in a Kubernetes "Secret". To decrypt and display it:
+## PROJECT STRUCTURE
+- /kube-objects/ : YAML Manifests (Services, Deployments, Ingress).
+- /shell-scripts/ : Automation scripts (Helm & Native Kubernetes).
+- .env : Environment variables and secrets (IGNORED BY GIT).
 
+---
+
+## DEPLOYMENT COMMANDS
+1. Deploy the entire infrastructure:
 ```bash
-kubectl get secret --namespace monitoring mon-monitoring-grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
+./deploy-infra.sh
 ```
-(The default username is admin).
 
-### 4. Access the Grafana Dashboard
-
-Open a tunnel to the Grafana service:
-
+2. Activate local access (Tunnels):
 ```bash
-kubectl port-forward svc/mon-monitoring-grafana 3000:80 --namespace monitoring
+./run-services.sh
 ```
-URL: http://localhost:3000
+---
 
-Once logged in, navigate to Dashboards > General > Kubernetes / Compute Resources / Cluster to view real-time metrics of your infrastructure.
+## SERVICE ACCESS LINKS
+Once the tunnels are running, access your services here:
 
-### 5. Teardown (Clean up)
+- Pi-hole (Via Ingress) : http://pihole.lab:8080/admin
+- Grafana Direct        : http://grafana.lab:3000/dashboards
+- Octant / K8s Dash     : https://octant.lab:8443
+- Authentik Direct      : http://authentic.lab:8081/if/flow/initial-setup/
 
-To cleanly destroy the infrastructure and free up resources:
-```bash
-# 1. Remove the monitoring stack (Helm)
-helm uninstall mon-monitoring --namespace monitoring
-kubectl delete namespace monitoring
+---
 
-# 2. Remove Pi-hole (YAML)
-kubectl delete -f k8s_pods/
-```
+## APPLIED SRE BEST PRACTICES
+- **Idempotency** : Helm scripts utilize ```upgrade --install``` .
+- **Security** : Secrets injection via .env files (never hardcoded).
+- **Fail-Fast** : Strict error handling using ```set -e``` in Bash scripts.
+- **Vendor Bypass** : Replaced broken Helm charts with official resilient alternatives.
